@@ -1,0 +1,70 @@
+{
+  // Python-specific settings
+  "python.defaultInterpreterPath": "${fraud-detection}/venv/bin/python",
+  "python.terminal.activateEnvironment": true,
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": false,
+  "python.linting.flake8Enabled": true,
+  "python.linting.flake8Args": [
+    "--max-line-length=88",
+    "--ignore=E203,W503"
+  ],
+  "python.formatting.provider": "black",
+  "python.formatting.blackArgs": [
+    "--line-length=88"
+  ],
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestArgs": [
+    "tests",
+    "-v",
+    "--cov=src",
+    "--cov-report=html",
+    "--cov-report=term"
+  ],
+  
+  // Jupyter Notebook settings
+  "jupyter.notebookFileRoot": "${fraud-detection}",
+  "notebook.output.textLineLimit": 100,
+  
+  // Workspace settings
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/*.pyc": true,
+    "**/.pytest_cache": true,
+    "**/.coverage": true,
+    "**/htmlcov": true,
+    "**/.mypy_cache": true,
+    "**/.ruff_cache": true
+  },
+  
+  // Editor settings
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "always"
+  },
+  "editor.rulers": [88],
+  
+  // File associations
+  "files.associations": {
+    "*.json": "jsonc"  // Allow comments in JSON files
+  },
+  
+  // Terminal settings
+  "terminal.integrated.env.linux": {
+    "PYTHONPATH": "${fraud-detection}/src:${workspaceFolder}"
+  },
+  "terminal.integrated.env.osx": {
+    "PYTHONPATH": "${fraud-detection}/src:${fraud-detection}"
+  },
+  "terminal.integrated.env.windows": {
+    "PYTHONPATH": "${fraud-detection}/src;${fraud-detection}"
+  },
+  
+  // Git settings
+  "git.autofetch": true,
+  "git.confirmSync": false,
+  
+  // Extension recommendations (optional but helpful)
+  "extensions.ignoreRecommendations": false
+}
