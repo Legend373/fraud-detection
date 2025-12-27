@@ -11,7 +11,7 @@ data/**
 
 # DVC cache
 /.dvc/cache/
-
+models/**
 # Misc
 .ipynb_checkpoints/
 .DS_Store

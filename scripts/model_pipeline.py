@@ -1,20 +1,35 @@
 import pandas as pd
 import numpy as np
-
+import os
+import joblib
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '..')))
 from sklearn.model_selection import train_test_split, StratifiedKFold, GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
     average_precision_score,
     f1_score,
-    confusion_matrix,
-    classification_report
+    confusion_matrix
 )
 
 class FraudModelPipeline:
-    def __init__(self, csv_path, target):
+    def __init__(self, csv_path, target,models_dir=None, model_name="dataset"):
         self.df = pd.read_csv(csv_path)
         self.target = target
+        self.model_name = model_name
+
+        # Default to a sibling directory named "models" if not provided
+        if models_dir is None:
+            # This goes one level up from current dir, then into 'models'
+            self.models_dir = os.path.join("..", "models")
+        else:
+            self.models_dir = models_dir
+
+        # Create the models directory (and any parent dirs) if it doesn't exist
+        os.makedirs(self.models_dir, exist_ok=True)
+        print(f"Models will be saved to: {os.path.abspath(self.models_dir)}")
 
     def split_data(self, test_size=0.2):
         X = self.df.drop(self.target, axis=1)
@@ -38,7 +53,7 @@ class FraudModelPipeline:
         }
 
     # -------------------------------
-    # Logistic Regression Baseline
+    # Logistic Regression
     # -------------------------------
     def train_logistic(self, X_train, y_train):
         model = LogisticRegression(
@@ -50,7 +65,7 @@ class FraudModelPipeline:
         return model
 
     # -------------------------------
-    # Random Forest Ensemble
+    # Random Forest
     # -------------------------------
     def train_random_forest(self, X_train, y_train):
         param_grid = {
@@ -76,14 +91,22 @@ class FraudModelPipeline:
         return grid.best_estimator_
 
     # -------------------------------
-    # Stratified K-Fold CV
+    # Save Model
+    # -------------------------------
+    def save_model(self, model, model_type):
+     # Use self.models_dir instead of hardcoded "models/"
+     path = os.path.join(self.models_dir, f"{self.model_name}_{model_type}.joblib")
+     joblib.dump(model, path)
+     print(f"Saved: {path}")
+
+    # -------------------------------
+    # Stratified CV
     # -------------------------------
     def cross_validate(self, model):
         X = self.df.drop(self.target, axis=1)
         y = self.df[self.target]
 
         skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-
         aucs, f1s = [], []
 
         for train_idx, test_idx in skf.split(X, y):
@@ -106,7 +129,7 @@ class FraudModelPipeline:
         }
 
     # -------------------------------
-    # Full Pipeline
+    # Run Full Pipeline
     # -------------------------------
     def run(self):
         X_train, X_test, y_train, y_test = self.split_data()
@@ -115,11 +138,13 @@ class FraudModelPipeline:
         log_model = self.train_logistic(X_train, y_train)
         log_metrics = self.evaluate(log_model, X_test, y_test)
         log_cv = self.cross_validate(log_model)
+        self.save_model(log_model, "logistic")
 
         # Random Forest
         rf_model = self.train_random_forest(X_train, y_train)
         rf_metrics = self.evaluate(rf_model, X_test, y_test)
         rf_cv = self.cross_validate(rf_model)
+        self.save_model(rf_model, "random_forest")
 
         return {
             "LogisticRegression": {
