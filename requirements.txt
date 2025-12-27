@@ -6,3 +6,5 @@ scipy
 scikit-learn
 jupyterlab
 imbalanced-learn
+joblib
+shap
