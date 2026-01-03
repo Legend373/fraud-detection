@@ -19,3 +19,4 @@ models/**
 
 # Allow root-level .dvc files
 !*.dvc
+/models
